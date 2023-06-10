@@ -1,6 +1,8 @@
 import streamlit as st
 from pathlib import Path
 from typing import Literal
+import av
+
 
 from streamlit_webrtc import (
     ClientSettings,
