@@ -38,8 +38,8 @@ class VideoRecorder:
         return self.frames
 
 class OpenCVVideoTransformer(VideoTransformerBase):
-    def __init__(self):
-        self.recorder = VideoRecorder()
+    def __init__(self, recorder):
+        self.recorder = recorder
 
     def transform(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
@@ -58,7 +58,7 @@ def main():
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
         client_settings=WEBRTC_CLIENT_SETTINGS,
-        video_transformer_factory=OpenCVVideoTransformer,
+        video_transformer_factory=lambda: OpenCVVideoTransformer(recorder),
         async_transform=True,
     )
 
