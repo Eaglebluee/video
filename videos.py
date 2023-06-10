@@ -6,8 +6,7 @@ from pathlib import Path
 from streamlit_webrtc import (
     ClientSettings,
     VideoTransformerBase,
-    WebRtcMode,
-    webrtc_streamer,
+    WebRtcMode
 )
 
 HERE = Path(__file__).parent
@@ -38,8 +37,8 @@ class VideoRecorder:
         return self.frames
 
 class OpenCVVideoTransformer(VideoTransformerBase):
-    def __init__(self, recorder):
-        self.recorder = recorder
+    def __init__(self):
+        self.recorder = VideoRecorder()
 
     def transform(self, frame: av.VideoFrame) -> av.VideoFrame:
         img = frame.to_ndarray(format="bgr24")
@@ -53,27 +52,27 @@ def main():
     st.title("Video Editor")
 
     recorder = VideoRecorder()
+    transformer = OpenCVVideoTransformer()
 
-    webrtc_ctx = webrtc_streamer(
+    if st.button("Start"):
+        recorder.start_recording()
+
+    if st.button("Stop"):
+        recorder.stop_recording()
+        recorded_video = recorder.get_recorded_video()
+
+        if recorded_video:
+            st.video(np.array(recorded_video))
+        else:
+            st.warning("No video recorded.")
+
+    webrtc_ctx = st.webrtc_streamer(
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
         client_settings=WEBRTC_CLIENT_SETTINGS,
-        video_transformer_factory=lambda: OpenCVVideoTransformer(recorder),
+        video_transformer_factory=transformer,
         async_transform=True,
     )
-
-    if webrtc_ctx.state.playing:
-        if st.button("Start Recording"):
-            recorder.start_recording()
-
-        if st.button("Stop Recording"):
-            recorder.stop_recording()
-            recorded_video = recorder.get_recorded_video()
-
-            if recorded_video:
-                st.video(np.array(recorded_video))
-            else:
-                st.warning("No video recorded.")
 
 if __name__ == "__main__":
     main()
