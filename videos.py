@@ -6,7 +6,8 @@ from pathlib import Path
 from streamlit_webrtc import (
     ClientSettings,
     VideoTransformerBase,
-    WebRtcMode
+    WebRtcMode,
+    webrtc_streamer,
 )
 
 HERE = Path(__file__).parent
@@ -66,10 +67,11 @@ def main():
         else:
             st.warning("No video recorded.")
 
-    webrtc_ctx = st.webrtc_streamer(
+    webrtc_ctx = webrtc_streamer(
         key="opencv-filter",
         mode=WebRtcMode.SENDRECV,
-        client_settings=WEBRTC_CLIENT_SETTINGS,
+        rtc_configuration=WEBRTC_CLIENT_SETTINGS.rtc_configuration,
+        media_stream_constraints=WEBRTC_CLIENT_SETTINGS.media_stream_constraints,
         video_transformer_factory=transformer,
         async_transform=True,
     )
